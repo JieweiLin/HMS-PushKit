@@ -22,7 +22,6 @@ import com.huawei.push.model.Importance;
 import com.huawei.push.model.Visibility;
 import com.huawei.push.util.CollectionUtils;
 import com.huawei.push.util.ValidatorUtils;
-
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -143,6 +142,8 @@ public class AndroidNotification {
     @JSONField(name = "inbox_content")
     private List<String> inboxContent = new ArrayList<>();
 
+    @JSONField(name = "buttons")
+    private List<Button> buttons = new ArrayList<>();
 
 
     private AndroidNotification(Builder builder) {
@@ -208,6 +209,18 @@ public class AndroidNotification {
         this.visibility = builder.visibility;
         this.lightSettings = builder.lightSettings;
         this.foregroundShow = builder.foregroundShow;
+
+        if (!CollectionUtils.isEmpty(builder.inboxContent)) {
+            this.inboxContent = builder.inboxContent;
+        } else {
+            this.inboxContent = null;
+        }
+
+        if (!CollectionUtils.isEmpty(builder.buttons)) {
+            this.buttons = builder.buttons;
+        } else {
+            this.buttons = null;
+        }
     }
 
     /**
@@ -241,15 +254,29 @@ public class AndroidNotification {
             ValidatorUtils.checkArgument(this.image.matches(URL_PATTERN), "notifyIcon must start with https");
         }
 
-        //Style 0,1,2
+        //Style 0,1,2,3
         if (this.style != null) {
             boolean isTrue = this.style == 0 ||
                     this.style == 1 ||
-                    this.style == 2;
-            ValidatorUtils.checkArgument(isTrue, "style should be one of 0:default, 1: big text, 2: big picture");
+                    this.style == 2 ||
+                    this.style == 3;
+            ValidatorUtils.checkArgument(isTrue, "style should be one of 0:default," +
+                    " 1: big text," +
+                    " 2: big picture," +
+                    " 3: inbox style");
 
             if (this.style == 1) {
                 ValidatorUtils.checkArgument(StringUtils.isNotEmpty(this.bigTitle) && StringUtils.isNotEmpty(this.bigBody), "title and body are required when style = 1");
+            }
+
+            if (this.style == 3) {
+                ValidatorUtils.checkArgument(!CollectionUtils.isEmpty(this.inboxContent), "inbox_content is required when style = 3");
+
+                ValidatorUtils.checkArgument(this.inboxContent.size() <= 5, "inbox_content array size cannot be more than 5");
+
+                this.inboxContent.forEach(s -> {
+                    ValidatorUtils.checkArgument(s.length() <= 1024, "inbox_content single size cannot be more than 1024");
+                });
             }
         }
 
@@ -301,6 +328,14 @@ public class AndroidNotification {
 
         if (this.lightSettings != null) {
             this.lightSettings.check();
+        }
+
+        if (!CollectionUtils.isEmpty(this.buttons)) {
+            ValidatorUtils.checkArgument(this.buttons.size() <= 3, "buttons array size cannot be more than 3");
+
+            this.buttons.forEach(button -> {
+                button.check();
+            });
         }
     }
 
@@ -443,6 +478,14 @@ public class AndroidNotification {
         return foregroundShow;
     }
 
+    public List<String> getInboxContent() {
+        return inboxContent;
+    }
+
+    public List<Button> getButtons() {
+        return buttons;
+    }
+
     /**
      * builder
      *
@@ -490,6 +533,9 @@ public class AndroidNotification {
         private String visibility;
         private LigthSettings lightSettings;
         private boolean foregroundShow;
+
+        private List<String> inboxContent = new ArrayList<>();
+        private List<Button> buttons = new ArrayList<>();
 
         private Builder() {
         }
@@ -672,6 +718,26 @@ public class AndroidNotification {
 
         public Builder setForegroundShow(boolean foregroundShow) {
             this.foregroundShow = foregroundShow;
+            return this;
+        }
+
+        public Builder addInboxContent(String inboxContent) {
+            this.inboxContent.add(inboxContent);
+            return this;
+        }
+
+        public Builder addAllInboxContent(List<String> inboxContents) {
+            this.inboxContent.addAll(inboxContents);
+            return this;
+        }
+
+        public Builder addButton(Button button) {
+            this.buttons.add(button);
+            return this;
+        }
+
+        public Builder addAllButton(List<Button> buttons) {
+            this.buttons.addAll(buttons);
             return this;
         }
 

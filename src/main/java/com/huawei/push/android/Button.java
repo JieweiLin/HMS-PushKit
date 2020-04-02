@@ -5,13 +5,22 @@ import com.huawei.push.util.ValidatorUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author linjw
- * @date 2020/4/2 11:10
+ * @Title: 通知栏消息动作按钮结构体
+ * @author: Linjw
+ * @date: 2020/4/2 14:30
  */
 public class Button {
     @JSONField(name = "name")
     private String name;
 
+    /**
+     * 按钮动作类型：
+     * 0：打开应用首页；
+     * 1：打开应用自定义页面；
+     * 2：打开指定的网页；
+     * 3：清除通知；
+     * 4：分享功能；
+     */
     @JSONField(name = "action_type")
     private Integer actionType;
 
@@ -79,11 +88,21 @@ public class Button {
             }
 
             if (this.actionType == 1 || this.actionType == 2) {
-                ValidatorUtils.checkArgument(StringUtils.isNotBlank(this.intent), "intent is required wheny action_type = 1 or action_type = 2");
+                ValidatorUtils.checkArgument(StringUtils.isNotBlank(this.intent), "intent is required when action_type = 1 or action_type = 2");
             }
 
+            if (this.actionType == 4) {
+                ValidatorUtils.checkArgument(StringUtils.isNotBlank(this.data), "data is required when action_type = 4");
+            }
 
+            if (StringUtils.isNotBlank(data)) {
+                ValidatorUtils.checkArgument(data.length() <= 1024, "data size cannot be more than 1024");
+            }
         }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder {
@@ -92,6 +111,10 @@ public class Button {
         private Integer intentType;
         private String intent;
         private String data;
+
+        private Builder() {
+
+        }
 
         public Builder setName(String name) {
             this.name = name;

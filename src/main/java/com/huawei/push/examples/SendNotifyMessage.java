@@ -17,10 +17,10 @@ package com.huawei.push.examples;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.huawei.push.android.AndroidNotification;
 import com.huawei.push.android.BadgeNotification;
+import com.huawei.push.android.Button;
 import com.huawei.push.android.ClickAction;
 import com.huawei.push.android.Color;
 import com.huawei.push.android.LigthSettings;
@@ -30,13 +30,11 @@ import com.huawei.push.message.Message;
 import com.huawei.push.message.Notification;
 import com.huawei.push.messaging.HuaweiApp;
 import com.huawei.push.messaging.HuaweiMessaging;
-import com.huawei.push.model.Urgency;
 import com.huawei.push.model.Importance;
+import com.huawei.push.model.Urgency;
 import com.huawei.push.model.Visibility;
 import com.huawei.push.reponse.SendResponse;
 import com.huawei.push.util.InitAppUtils;
-
-import java.io.Serializable;
 
 public class SendNotifyMessage {
     /**
@@ -77,7 +75,7 @@ public class SendNotifyMessage {
                 /**
                  * 自定义通知栏按钮颜色，以#RRGGBB格式，其中RR代表红色的16进制色素，GG代表绿色的16进制色素，BB代表蓝色的16进制色素，样例：#FFEEFF。
                  */
-                .setColor("#AACCDD")
+                .setColor("#FF0000")
                 /**
                  * 自定义消息通知铃声，在新创建渠道时有效，此处设置的铃声文件必须存放在应用的/res/raw路径下，例如设置为"/raw/shake"，对应应用本地的/res/raw/shake.xxx文件，支持的文件格式包括mp3、wav、mpeg等，如果不设置使用默认系统铃声。
                  */
@@ -134,6 +132,7 @@ public class SendNotifyMessage {
                  * 3：Inbox样式
                  */
                 .setStyle(3)
+                .addInboxContent("1、inbox Content 1").addInboxContent("2、inbox Content 2")
                 /**
                  * 安卓通知栏消息大文本标题，当style为1时必选，设置big_title后通知栏展示时，使用big_title而不用title。
                  */
@@ -183,6 +182,18 @@ public class SendNotifyMessage {
                  * 设备应用在前台时通知栏消息是否前台展示开关
                  */
                 .setForegroundShow(true)
+                .addButton(Button.builder()
+                        .setName("button1")
+                        .setActionType(0)
+                        .build())
+                .addButton(Button.builder()
+                        .setName("button2")
+                        .setActionType(2)
+                        .setIntent("https://www.huawei.com")
+                        .build())
+                .addButton(Button.builder()
+                        .setName("button3")
+                        .setActionType(3).build())
                 .build();
 
         AndroidConfig androidConfig = AndroidConfig.builder()
@@ -219,6 +230,7 @@ public class SendNotifyMessage {
                 .addToken("AKHetDqajAJTiaUJM-J51bxaUxuX-6MWck2LMKZj_V1lBuOOSrIA27qu_CjorYWTOlawCjs9S_Y6IeFJBqXGqqKJ1KG5LYBzh54bLKaA8AS42U-d31xCpIZ7yAKLvsErXw")
                 .build();
 
+        System.out.println("message: " + JSON.toJSONString(message, SerializerFeature.WriteDateUseDateFormat));
         SendResponse response = huaweiMessaging.sendMessage(message);
         return response;
     }
